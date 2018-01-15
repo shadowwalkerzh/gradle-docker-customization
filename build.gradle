@@ -1,0 +1,50 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.8.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply from: "$rootDir/gradle/dependencies.gradle"
+
+allprojects {
+    group 'com.wan'
+    version '1.0-SNAPSHOT'
+}
+
+subprojects {
+    apply from: "$rootDir/gradle/artifacts.gradle"
+
+    repositories {
+        mavenCentral()
+    }
+
+    def basePath = "$rootDir/build-repo/$activeProfile/${project.name}/"
+    def jarName = "${project.name}_${version}_${activeProfile}_${getDate()}.jar"
+    def dockerfile = file("$rootDir/${project.name}/docker/Dockerfile")
+    def dockerAdd = "ADD $jarName ${project.name}.jar"
+
+    copy {
+        // Copy JAR into docker preparation folder
+        from(jar) {
+            rename(jar.archiveName, jarName)
+        }
+        //Add Dockerfile to output path
+        from(dockerfile) {
+            filter { line -> line.startsWith("ADD") && line.endsWith("${project.name}.jar") ? line.replace(line, dockerAdd) : line }
+        }
+        into basePath
+    }
+
+    println "Docker build jar: $jarName \nwith dockerfile info: \n${dockerfile.text}"
+}
+
+static def getDate() {
+    return new Date().format('yyyyMMddHHmm')
+}
+

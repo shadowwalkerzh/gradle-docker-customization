@@ -1,0 +1,8 @@
+dependencies {
+    compile libs['spring-boot-starter-web']
+}
+
+bootRepackage {
+    mainClass = 'com.wan.SecondApplication'
+}
+

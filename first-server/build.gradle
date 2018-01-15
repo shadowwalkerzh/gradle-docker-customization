@@ -1,0 +1,9 @@
+dependencies {
+    compile libs['spring-boot-starter-web']
+    compile libs['lombok']
+}
+
+bootRepackage {
+    mainClass = 'com.wan.FirstApplication'
+}
+

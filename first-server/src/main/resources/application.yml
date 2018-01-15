@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: first-server
+server:
+  port: 7001

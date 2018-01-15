@@ -1,0 +1,4 @@
+rootProject.name = 'gradle-docker-customization'
+include 'first-server'
+include 'second-server'
+

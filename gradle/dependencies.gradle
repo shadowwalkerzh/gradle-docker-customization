@@ -1,0 +1,15 @@
+ext {
+    versions = [
+            'groovy'     : '2.4.11',
+            'lombok'     : '1.16.16',
+            'spring.boot': "1.5.8.RELEASE"
+    ]
+
+    libs = [
+            'groovy'                  : "org.codehaus.groovy:groovy-all:${versions['groovy']}",
+            'lombok'                  : "org.projectlombok:lombok:${versions['lombok']}",
+
+            'spring-boot-starter-test': "org.springframework.boot:spring-boot-starter-test:${versions['spring.boot']}",
+            'spring-boot-starter-web' : "org.springframework.boot:spring-boot-starter-web:${versions['spring.boot']}"
+    ]
+}

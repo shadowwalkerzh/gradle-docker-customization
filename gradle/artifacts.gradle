@@ -1,0 +1,43 @@
+apply plugin: 'groovy'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+def gitVersion = 'git log --max-count=1 --pretty=format:%ad-%H --date=format-local:%Y%m%d-%H%M%S'.execute().text.toString()
+
+def compilerArgs = []
+compileJava.options.compilerArgs = compilerArgs
+compileTestJava.options.compilerArgs = compilerArgs
+
+def sourceEncoding = 'UTF-8'
+tasks.withType(AbstractCompile).each { it.options.encoding = sourceEncoding }
+
+//Add Provided Dependency Support
+configurations {
+    provided
+    compile.extendsFrom provided
+}
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [configurations.provided]
+        downloadJavadoc = false
+        downloadSources = true
+    }
+}
+
+//Add Spring Boot Build Additional Information
+springBoot {
+    executable = true
+    buildInfo {
+        additionalProperties = [
+                buildVersion: gitVersion
+        ]
+    }
+}
+
+dependencies {
+    compile libs['groovy']
+}

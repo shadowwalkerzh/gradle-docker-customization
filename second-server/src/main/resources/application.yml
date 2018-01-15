@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: second-server
+server:
+  port: 7002
