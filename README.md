@@ -1,5 +1,5 @@
 **Simple groovy projects and build with brief but elegant gradle configurations, can run with custom dockerfile** 
-#### Build Jar
+#### Build Jars
  ```
 gradle -PactiveProfile=dev build 
 ```
@@ -14,12 +14,40 @@ Then all built projects will be in
 outputPath = ${rootDir}/build-repo/${activeProfile}/
 ```
 
-#### Build Docker 
-Please install [docker](https://docs.docker.com/engine/installation) beforehand if your docker environment is not ready.<br/>
-Build first-server as an example: 
+#### Build Docker Images
+Please install [docker](https://docs.docker.com/engine/installation) beforehand if your docker environment is not ready. 
+ ```
+gradle -PactiveProfile=dev buildAppImage 
 ```
-cd ${outputPath}/${projectName}
-docker build -t first-server:1.0-SNAPSHOT . 
+or 
+```
+gradle --project-pro activeProfile=dev buildAppImage
+```
+
+#### Build Docker Containers 
+Will create all service containers automatically. 
+ ```
+gradle -PactiveProfile=dev buildAppContainer 
+```
+or 
+```
+gradle --project-pro activeProfile=dev buildAppContainer
+```
+List docker containers:
+```
+docker ps 
+```
+
+#### Push Docker Images 
+Will push all service docker images to your docker registry automatically.<br/>
+Firstly, set your docker registry username and password in file ${rootDir}/docker/docker.key.<br/>
+Then run the command:
+ ```
+gradle -PactiveProfile=dev pushAppImage 
+```
+or 
+```
+gradle --project-pro activeProfile=dev pushAppImage
 ```
 
 #### Run Application with Docker

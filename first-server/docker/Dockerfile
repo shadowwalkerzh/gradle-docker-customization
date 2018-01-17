@@ -13,6 +13,6 @@ RUN \
   rm -rf /var/cache/oracle-jdk8-installer
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
-ADD first-server_1.0-SNAPSHOT.jar first-server.jar
+ADD JAR
 EXPOSE 8001
 CMD java -jar first-server.jar

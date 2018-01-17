@@ -13,6 +13,6 @@ RUN \
   rm -rf /var/cache/oracle-jdk8-installer
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
-ADD second-server_1.0-SNAPSHOT.jar second-server.jar
+ADD JAR
 EXPOSE 8002
 CMD java -jar second-server.jar

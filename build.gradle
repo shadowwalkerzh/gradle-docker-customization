@@ -1,12 +1,18 @@
+import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+
 buildscript {
     ext {
         springBootVersion = '1.5.8.RELEASE'
+        dockerVersion = '3.2.1'
     }
     repositories {
         mavenCentral()
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("com.bmuschko:gradle-docker-plugin:${dockerVersion}")
     }
 }
 
@@ -19,6 +25,7 @@ allprojects {
 
 subprojects {
     apply from: "$rootDir/gradle/artifacts.gradle"
+    apply plugin: 'com.bmuschko.docker-remote-api'
 
     repositories {
         mavenCentral()
@@ -26,7 +33,7 @@ subprojects {
 
     def basePath = "$rootDir/build-repo/$activeProfile/${project.name}/"
     def jarName = "${project.name}_${version}_${activeProfile}_${getDate()}.jar"
-    def dockerfile = file("$rootDir/${project.name}/docker/Dockerfile")
+    def dockerfile = file("$rootDir/${project.name}/Dockerfile")
     def dockerAdd = "ADD $jarName ${project.name}.jar"
 
     copy {
@@ -36,12 +43,42 @@ subprojects {
         }
         //Add Dockerfile to output path
         from(dockerfile) {
-            filter { line -> line.startsWith("ADD") && line.endsWith("${project.name}.jar") ? line.replace(line, dockerAdd) : line }
+            filter { line -> line == 'ADD JAR' ? line.replace(line, dockerAdd) : line }
         }
         into basePath
     }
 
-    println "Docker build jar: $jarName \nwith dockerfile info: \n${dockerfile.text}"
+    println "Docker build jar: $jarName \nwith dockerfile info: \n${file("$basePath/Dockerfile").text}"
+
+    //Docker build & push images to registry
+    List<String> keys = file("$rootDir/docker/docker.key").readLines()
+    def DOCKER_USERNAME = keys.get(0)
+    def DOCKER_PASSWORD = keys.get(1)
+    def appImageName = "$project.name:$project.version"
+    def appImageTag = "$DOCKER_USERNAME/$appImageName"
+
+    docker {
+        registryCredentials {
+            //Default url is https://index.docker.io/v1/, set url parameter below if you have your private docker registry
+//            url = '{your docker registry url}'
+            username = DOCKER_USERNAME
+            password = DOCKER_PASSWORD
+        }
+    }
+
+    task buildAppImage(type: DockerBuildImage) {
+        inputDir = project.file("$basePath")
+        tag = appImageTag
+    }
+
+    task buildAppContainer(type: DockerCreateContainer, dependsOn: 'buildAppImage') {
+        targetImageId { buildAppImage.getImageId() }
+    }
+
+    task pushAppImage(type: DockerPushImage, dependsOn: 'buildAppImage') {
+        conventionMapping.imageName = { buildAppImage.getTag() }
+    }
+
 }
 
 static def getDate() {
